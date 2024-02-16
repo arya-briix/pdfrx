@@ -1,3 +1,7 @@
+# 0.4.45
+
+- FIXED: PdfViewerController.removeListener causes Null check operator used on a null value exception #74
+
 # 0.4.44
 
 - FIXED: PdfViewerParams.boundaryMargin does not work correctly.

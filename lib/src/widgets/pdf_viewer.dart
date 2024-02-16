@@ -1280,11 +1280,20 @@ class PdfPageLayout {
 /// You can check whether the controller is associated or not by checking [isReady] property.
 class PdfViewerController extends ValueListenable<Matrix4> {
   _PdfViewerState? __state;
+  final _listeners = <VoidCallback>[];
 
   static const maxZoom = 8.0;
 
   void _attach(_PdfViewerState? state) {
+    __state?._txController.removeListener(_notifyListeners);
     __state = state;
+    __state?._txController.addListener(_notifyListeners);
+  }
+
+  void _notifyListeners() {
+    for (final listener in _listeners) {
+      listener();
+    }
   }
 
   _PdfViewerState get _state {
@@ -1331,12 +1340,10 @@ class PdfViewerController extends ValueListenable<Matrix4> {
       _state._txController.value = makeMatrixInSafeRange(newValue);
 
   @override
-  void addListener(ui.VoidCallback listener) =>
-      _state._txController.addListener(listener);
+  void addListener(ui.VoidCallback listener) => _listeners.add(listener);
 
   @override
-  void removeListener(ui.VoidCallback listener) =>
-      _state._txController.removeListener(listener);
+  void removeListener(ui.VoidCallback listener) => _listeners.remove(listener);
 
   /// Restrict matrix to the safe range.
   Matrix4 makeMatrixInSafeRange(Matrix4 newValue) =>
@@ -1381,6 +1388,11 @@ class PdfViewerController extends ValueListenable<Matrix4> {
       _state._goToPage(
           pageNumber: pageNumber, anchor: anchor, duration: duration);
 
+  /// Go to the specified area inside the page.
+  ///
+  /// [pageNumber] specifies the page number.
+  /// [rect] specifies the area to go in page coordinates.
+  /// [anchor] specifies how the page is positioned if the page is larger than the view.
   Future<void> goToRectInsidePage({
     required int pageNumber,
     required PdfRect rect,
@@ -1394,6 +1406,10 @@ class PdfViewerController extends ValueListenable<Matrix4> {
         duration: duration,
       );
 
+  /// Calculate the rectangle for the specified area inside the page.
+  ///
+  /// [pageNumber] specifies the page number.
+  /// [rect] specifies the area to go in page coordinates.
   Rect calcRectForRectInsidePage({
     required int pageNumber,
     required PdfRect rect,
@@ -1403,6 +1419,11 @@ class PdfViewerController extends ValueListenable<Matrix4> {
         rect: rect,
       );
 
+  /// Calculate the matrix for the specified area inside the page.
+  ///
+  /// [pageNumber] specifies the page number.
+  /// [rect] specifies the area to go in page coordinates.
+  /// [anchor] specifies how the page is positioned if the page is larger than the view.
   Matrix4 calcMatrixForRectInsidePage({
     required int pageNumber,
     required PdfRect rect,
@@ -1415,6 +1436,9 @@ class PdfViewerController extends ValueListenable<Matrix4> {
       );
 
   /// Go to the specified destination.
+  ///
+  /// [dest] specifies the destination.
+  /// [duration] specifies the duration of the animation.
   Future<bool> goToDest(
     PdfDest? dest, {
     Duration duration = const Duration(milliseconds: 200),
@@ -1422,10 +1446,13 @@ class PdfViewerController extends ValueListenable<Matrix4> {
       _state._goToDest(dest, duration: duration);
 
   /// Calculate the matrix for the specified destination.
+  ///
+  /// [dest] specifies the destination.
   Matrix4? calcMatrixForDest(PdfDest? dest) => _state._calcMatrixForDest(dest);
 
   /// Calculate the matrix for the page.
   ///
+  /// [pageNumber] specifies the page number.
   /// [anchor] specifies how the page is positioned if the page is larger than the view.
   Matrix4 calcMatrixForPage({
     required int pageNumber,
@@ -1435,6 +1462,7 @@ class PdfViewerController extends ValueListenable<Matrix4> {
 
   /// Calculate the matrix for the specified area.
   ///
+  /// [rect] specifies the area in document coordinates.
   /// [anchor] specifies how the page is positioned if the page is larger than the view.
   Matrix4 calcMatrixForArea({
     required Rect rect,
