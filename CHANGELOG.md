@@ -1,3 +1,7 @@
+# 0.4.46
+
+- FIXED: calcZoomStopTable hangs app if zoom ratio is almost 0 (#79)
+
 # 0.4.45
 
 - FIXED: PdfViewerController.removeListener causes Null check operator used on a null value exception #74
