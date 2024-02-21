@@ -1,3 +1,7 @@
+# 0.0.46
+
+- This is a backport to Flutter 3.12 that completely removes Flutter Web support
+
 # 0.4.46
 
 - FIXED: calcZoomStopTable hangs app if zoom ratio is almost 0 (#79)

@@ -1,4 +1,7 @@
-# pdfrx
+# pdfrx 0.0.46
+
+> [!NOTE]
+> This is a backport to _Flutter 3.12_ that completely removes Flutter Web support
 
 [pdfrx](https://pub.dartlang.org/packages/pdfrx) is a rich and fast PDF viewer implementation built on the top of [pdfium](https://pdfium.googlesource.com/pdfium/).
 The plugin supports Android, iOS, Windows, macOS, Linux, and Web.
@@ -62,7 +65,7 @@ Add this to your package's `pubspec.yaml` file and execute `flutter pub get`:
 
 ```yaml
 dependencies:
-  pdfrx: ^0.4.46
+  pdfrx: ^0.0.46
 ```
 
 ### Windows

@@ -144,5 +144,6 @@
     "xlocnum": "cpp",
     "xloctime": "cpp",
     "xstring": "cpp"
-  }
+  },
+  "java.configuration.updateBuildConfiguration": "disabled"
 }

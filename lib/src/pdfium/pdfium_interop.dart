@@ -37,33 +37,41 @@ final _pdfrx_file_access_set_value = interopLib
 typedef _NativeFileReadCallable
     = NativeCallable<Void Function(IntPtr, IntPtr, Pointer<Uint8>, IntPtr)>;
 
+typedef ReadFunction = FutureOr<int> Function(
+    Uint8List buffer, int position, int size);
+
 class FileAccess {
   FileAccess(
     int fileSize,
-    FutureOr<int> Function(Uint8List buffer, int position, int size) read,
+    ReadFunction read,
   ) {
-    void readNative(
-      int param,
-      int position,
-      Pointer<Uint8> buffer,
-      int size,
-    ) async {
-      try {
-        final readSize = await read(buffer.asTypedList(size), position, size);
-        _pdfrx_file_access_set_value(_fileAccess, readSize);
-      } catch (e) {
-        _pdfrx_file_access_set_value(_fileAccess, -1);
-      }
-    }
-
     _nativeCallable = _NativeFileReadCallable.listener(readNative);
+    final id = _readMap.length;
     _fileAccess = _pdfrx_file_access_create(
-        fileSize, _nativeCallable.nativeFunction.address, 0);
+        fileSize, _nativeCallable.nativeFunction.address, id);
+    _readMap[id] = (fileAccess: _fileAccess, read: read);
   }
 
   void dispose() {
+    _readMap.remove(_fileAccess);
     _pdfrx_file_access_destroy(_fileAccess);
     _nativeCallable.close();
+  }
+
+  static void readNative(
+    int param,
+    int position,
+    Pointer<Uint8> buffer,
+    int size,
+  ) async {
+    final context = _readMap[param]!;
+    try {
+      final readSize =
+          await context.read(buffer.asTypedList(size), position, size);
+      _pdfrx_file_access_set_value(context.fileAccess, readSize);
+    } catch (e) {
+      _pdfrx_file_access_set_value(context.fileAccess, -1);
+    }
   }
 
   Pointer<FPDF_FILEACCESS> get fileAccess =>
@@ -71,4 +79,5 @@ class FileAccess {
 
   late final int _fileAccess;
   late final _NativeFileReadCallable _nativeCallable;
+  static final _readMap = <int, ({int fileAccess, ReadFunction read})>{};
 }
