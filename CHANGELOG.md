@@ -1,3 +1,7 @@
+# 0.4.47
+
+- Get back to intl 0.18.1 (#87)
+
 # 0.4.46
 
 - FIXED: calcZoomStopTable hangs app if zoom ratio is almost 0 (#79)
