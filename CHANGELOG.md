@@ -1,3 +1,7 @@
+# 0.0.47
+
+- Get back to intl 0.18.1
+
 # 0.0.46
 
 - This is a backport to Flutter 3.12 that completely removes Flutter Web support

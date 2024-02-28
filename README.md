@@ -1,10 +1,10 @@
-# pdfrx 0.0.46
+# pdfrx 0.0.47
 
 > [!NOTE]
 > This is a backport to _Flutter 3.12_ that completely removes Flutter Web support
 
 [pdfrx](https://pub.dartlang.org/packages/pdfrx) is a rich and fast PDF viewer implementation built on the top of [pdfium](https://pdfium.googlesource.com/pdfium/).
-The plugin supports Android, iOS, Windows, macOS, Linux, and Web.
+The plugin supports Android, iOS, Windows, macOS, Linux, ~~and Web~~.
 
 ## Interactive Demo
 
@@ -27,7 +27,7 @@ A [demo site](https://espresso3389.github.io/pdfrx/) using Flutter Web
   - Windows
   - macOS
   - Linux (even on Raspberry PI)
-  - Web (\*using [PDF.js](https://mozilla.github.io/pdf.js/))
+  - ~~Web (\*using [PDF.js](https://mozilla.github.io/pdf.js/))~~
 
 - Three layers of APIs:
   - Easy to use Flutter widgets
@@ -65,7 +65,7 @@ Add this to your package's `pubspec.yaml` file and execute `flutter pub get`:
 
 ```yaml
 dependencies:
-  pdfrx: ^0.0.46
+  pdfrx: ^0.0.47
 ```
 
 ### Windows
