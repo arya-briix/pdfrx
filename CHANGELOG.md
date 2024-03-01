@@ -1,3 +1,7 @@
+# 0.4.48
+
+- js package gets back to 0.6.7
+
 # 0.4.47
 
 - Get back to intl 0.18.1 (#87)
