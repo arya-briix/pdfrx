@@ -1,4 +1,4 @@
-# pdfrx 0.0.47
+# pdfrx 0.0.49
 
 > [!NOTE]
 > This is a backport to _Flutter 3.12_ that completely removes Flutter Web support
@@ -65,7 +65,7 @@ Add this to your package's `pubspec.yaml` file and execute `flutter pub get`:
 
 ```yaml
 dependencies:
-  pdfrx: ^0.0.47
+  pdfrx: ^0.0.49
 ```
 
 ### Windows

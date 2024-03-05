@@ -1,3 +1,7 @@
+# 0.0.49
+
+- iOS minimum deployment target 12.0
+
 # 0.0.47
 
 - Get back to intl 0.18.1
