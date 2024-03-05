@@ -1,3 +1,7 @@
+# 0.4.49
+
+- iOS minimum deployment target 12.0
+
 # 0.4.48
 
 - js package gets back to 0.6.7
