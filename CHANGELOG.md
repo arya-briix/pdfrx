@@ -1,3 +1,9 @@
+# 0.0.51
+
+- FIXED: memory leak on \_PdfPageViewState (#110)
+- Remove dependency on dart:js_util (#109)
+- FIXED: Crash on \_PdfViewerScrollThumbState (#86)
+
 # 0.0.50
 
 - Introduces PdfViewerParams.useAlternativeFitScaleAsMinScale but it's not recommended to set the value to false because it may degrade the viewer performance
