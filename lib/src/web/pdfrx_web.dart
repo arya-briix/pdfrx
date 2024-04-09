@@ -466,6 +466,7 @@ class PdfPageRenderCancellationTokenWeb extends PdfPageRenderCancellationToken {
   @override
   void cancel() => _canceled = true;
 
+  @override
   bool get isCanceled => _canceled;
 }
 
