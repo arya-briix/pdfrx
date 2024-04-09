@@ -1,16 +1,51 @@
-# pdfrx_example
+# Minimum Example
 
-Demonstrates how to use the pdfrx plugin.
+```dart
+import 'package:flutter/material.dart';
+import 'package:pdfrx/pdfrx.dart';
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
+void main() {
+  runApp(const MyApp());
+}
 
-A few resources to get you started if this is your first Flutter project:
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      title: 'Pdfrx example',
+      home: MainPage(),
+    );
+  }
+}
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
+
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () {
+            showLeftPane.value = !showLeftPane.value;
+          },
+        ),
+        title: const Text('Pdfrx example'),
+      ),
+      body: PdfViewer.asset(
+        'assets/password_protected_sample.pdf',
+        passwordProvider: () => 'test',
+      ),
+    );
+  }
+}
+```

@@ -796,6 +796,9 @@ class PdfPageRenderCancellationTokenPdfium
   Pointer<Bool>? _cancelFlag;
   bool _canceled = false;
 
+  @override
+  bool get isCanceled => _canceled;
+
   void attach(Pointer<Bool> pointer) {
     _cancelFlag = pointer;
     if (_canceled) {
