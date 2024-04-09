@@ -1,3 +1,7 @@
+# 0.4.52
+
+- Fixes memory consumption control issues (Related: #121)
+
 # 0.4.51
 
 - FIXED: memory leak on \_PdfPageViewState (#110)
