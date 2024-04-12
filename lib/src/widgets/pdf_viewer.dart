@@ -960,6 +960,7 @@ class _PdfViewerState extends State<PdfViewer>
         fullHeight: height,
         backgroundColor: Colors.white,
         annotationRenderingMode: widget.params.annotationRenderingMode,
+        outputType: PdfRenderOutputType.png,
         cancellationToken: cancellationToken,
       );
       if (img == null) return;

@@ -3,7 +3,6 @@
 
 import 'dart:async';
 import 'dart:js_interop';
-import 'dart:ui';
 
 import 'package:flutter/services.dart';
 import 'package:synchronized/extension.dart';
@@ -327,6 +326,7 @@ class PdfPageWeb extends PdfPage {
     Color? backgroundColor,
     PdfAnnotationRenderingMode annotationRenderingMode =
         PdfAnnotationRenderingMode.annotationAndForms,
+    PdfRenderOutputType outputType = PdfRenderOutputType.raw,
     PdfPageRenderCancellationToken? cancellationToken,
   }) async {
     if (cancellationToken != null &&
@@ -346,20 +346,23 @@ class PdfPageWeb extends PdfPage {
         return null;
       }
       final data = await _renderRaw(
-        x,
-        y,
-        width!,
-        height!,
-        fullWidth!,
-        fullHeight!,
-        backgroundColor,
-        false,
-        annotationRenderingMode,
-      );
+          x,
+          y,
+          width!,
+          height!,
+          fullWidth!,
+          fullHeight!,
+          backgroundColor,
+          false,
+          annotationRenderingMode,
+          outputType);
       return PdfImageWeb(
         width: width,
         height: height,
-        pixels: data,
+        format: outputType == PdfRenderOutputType.raw
+            ? PdfImageDataFormat.rgba
+            : PdfImageDataFormat.png,
+        data: data,
       );
     });
   }
@@ -378,6 +381,7 @@ class PdfPageWeb extends PdfPage {
     Color? backgroundColor,
     bool dontFlip,
     PdfAnnotationRenderingMode annotationRenderingMode,
+    PdfRenderOutputType outputType,
   ) async {
     final vp1 = page.getViewport(PdfjsViewportParams(scale: 1));
     final pageWidth = vp1.width;
@@ -414,13 +418,23 @@ class PdfPageWeb extends PdfPage {
         .promise
         .toDart;
 
-    final src = canvas.context2D
-        .getImageData(0, 0, width, height)
-        .data
-        .toDart
-        .buffer
-        .asUint8List();
-    return src;
+    if (outputType == PdfRenderOutputType.raw) {
+      return canvas.context2D
+          .getImageData(0, 0, width, height)
+          .data
+          .toDart
+          .buffer
+          .asUint8List();
+    } else {
+      final completer = Completer<Uint8List>();
+      void blobCallback(web.Blob blob) async {
+        final arrayBuffer = await blob.arrayBuffer().toDart;
+        completer.complete(arrayBuffer.toDart.asUint8List());
+      }
+
+      canvas.toBlob(blobCallback.toJS);
+      return completer.future;
+    }
   }
 
   @override
@@ -469,17 +483,23 @@ class PdfPageRenderCancellationTokenWeb extends PdfPageRenderCancellationToken {
 }
 
 class PdfImageWeb extends PdfImage {
-  PdfImageWeb(
-      {required this.width, required this.height, required this.pixels});
+  PdfImageWeb({
+    required this.width,
+    required this.height,
+    required this.data,
+    required this.format,
+  });
 
   @override
   final int width;
   @override
   final int height;
+
   @override
-  final Uint8List pixels;
+  final PdfImageDataFormat format;
   @override
-  PixelFormat get format => PixelFormat.rgba8888;
+  final Uint8List data;
+
   @override
   void dispose() {}
 }

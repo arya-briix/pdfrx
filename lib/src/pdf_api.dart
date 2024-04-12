@@ -305,6 +305,7 @@ abstract class PdfPage {
     Color? backgroundColor,
     PdfAnnotationRenderingMode annotationRenderingMode =
         PdfAnnotationRenderingMode.annotationAndForms,
+    PdfRenderOutputType outputType = PdfRenderOutputType.raw,
     PdfPageRenderCancellationToken? cancellationToken,
   });
 
@@ -333,6 +334,19 @@ enum PdfAnnotationRenderingMode {
   none,
   annotation,
   annotationAndForms,
+}
+
+/// [raw] may output raw pixel data in platform dependent format either RGBA or BGRA.
+/// [png] outputs PNG image data.
+enum PdfRenderOutputType {
+  raw,
+  png,
+}
+
+enum PdfImageDataFormat {
+  rgba,
+  bgra,
+  png,
 }
 
 /// Token to try to cancel the rendering process.
@@ -377,11 +391,11 @@ abstract class PdfImage {
   /// Number of pixels in vertical direction.
   int get height;
 
-  /// Pixel format in either [ui.PixelFormat.rgba8888] or [ui.PixelFormat.bgra8888].
-  ui.PixelFormat get format;
+  /// Image data type.
+  PdfImageDataFormat get format;
 
-  /// Raw pixel data. The actual format is platform dependent.
-  Uint8List get pixels;
+  /// Raw data. Actual data format is determined by [format].
+  Uint8List get data;
 
   /// Dispose the image.
   void dispose();
@@ -389,8 +403,19 @@ abstract class PdfImage {
   /// Create [ui.Image] from the rendered image.
   Future<ui.Image> createImage() {
     final comp = Completer<ui.Image>();
-    ui.decodeImageFromPixels(
-        pixels, width, height, format, (image) => comp.complete(image));
+    if (format == PdfImageDataFormat.rgba ||
+        format == PdfImageDataFormat.bgra) {
+      ui.decodeImageFromPixels(
+          data,
+          width,
+          height,
+          format == PdfImageDataFormat.rgba
+              ? ui.PixelFormat.rgba8888
+              : ui.PixelFormat.bgra8888,
+          (image) => comp.complete(image));
+    } else {
+      ui.decodeImageFromList(data, (image) => comp.complete(image));
+    }
     return comp.future;
   }
 }

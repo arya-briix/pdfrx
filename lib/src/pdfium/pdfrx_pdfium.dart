@@ -2,7 +2,6 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
@@ -519,6 +518,7 @@ class PdfPagePdfium extends PdfPage {
     Color? backgroundColor,
     PdfAnnotationRenderingMode annotationRenderingMode =
         PdfAnnotationRenderingMode.annotationAndForms,
+    PdfRenderOutputType outputType = PdfRenderOutputType.raw,
     PdfPageRenderCancellationToken? cancellationToken,
   }) async {
     if (cancellationToken != null &&
@@ -538,7 +538,8 @@ class PdfPagePdfium extends PdfPage {
     const rgbaSize = 4;
     Pointer<Uint8> buffer = nullptr;
     try {
-      buffer = malloc.allocate<Uint8>(width * height * rgbaSize);
+      final bufferSize = width * height * rgbaSize;
+      buffer = malloc.allocate<Uint8>(bufferSize);
       final isSucceeded = await using(
         (arena) async {
           final cancelFlag = arena.allocate<Bool>(sizeOf<Bool>());
@@ -647,7 +648,9 @@ class PdfPagePdfium extends PdfPage {
       return PdfImagePdfium._(
         width: width,
         height: height,
+        format: PdfImageDataFormat.bgra,
         buffer: resultBuffer,
+        size: bufferSize,
       );
     } catch (e) {
       return null;
@@ -853,17 +856,21 @@ class PdfImagePdfium extends PdfImage {
   @override
   final int height;
   @override
-  ui.PixelFormat get format => ui.PixelFormat.bgra8888;
+  final PdfImageDataFormat format;
   @override
-  Uint8List get pixels => _buffer.asTypedList(width * height * 4);
+  Uint8List get data => _buffer.asTypedList(_size);
 
   final Pointer<Uint8> _buffer;
+  final int _size;
 
   PdfImagePdfium._({
     required this.width,
     required this.height,
+    required this.format,
     required Pointer<Uint8> buffer,
-  }) : _buffer = buffer;
+    required int size,
+  })  : _buffer = buffer,
+        _size = size;
 
   @override
   void dispose() {
