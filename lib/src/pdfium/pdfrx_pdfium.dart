@@ -621,7 +621,7 @@ class PdfPagePdfium extends PdfPage {
 
                     final pSize =
                         Pointer<UintPtr>.fromAddress(params.workBuffer);
-                    final pngBuffer = pdfrx_rgba_to_png(
+                    final pngBuffer = pdfrx_bgra_to_png(
                       buffer,
                       params.width,
                       params.height,

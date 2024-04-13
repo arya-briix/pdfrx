@@ -67,6 +67,7 @@ file(REMOVE ${PDFIUM_LATEST_DIR})
 file(CREATE_LINK ${PDFIUM_LIBS_DIR} ${PDFIUM_LATEST_DIR} SYMBOLIC)
 
 find_library(libc++ libc++_static.a)
+find_library(log log)
 
 set(pdfrx_bundled_libraries
   # Defined in ../src/CMakeLists.txt.
@@ -76,5 +77,9 @@ set(pdfrx_bundled_libraries
   PARENT_SCOPE
 )
 
+set(PDFIUM_COMPILE_OPTIONS_x86 -mpclmul -msse4.1)
+set(PDFIUM_COMPILE_OPTIONS_x86_64 -mpclmul -msse4.1)
+
 target_include_directories(pdfrx PRIVATE ${PDFIUM_LATEST_DIR}/include)
-target_link_libraries(pdfrx PRIVATE ${PDFIUM_LASTEST_LIB_FILENAME} ${libc++})
+target_compile_options(pdfrx PRIVATE ${PDFIUM_COMPILE_OPTIONS_${ANDROID_ABI}})
+target_link_libraries(pdfrx PRIVATE ${PDFIUM_LASTEST_LIB_FILENAME} ${libc++} ${log})

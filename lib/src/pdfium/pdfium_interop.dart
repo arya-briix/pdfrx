@@ -39,14 +39,14 @@ final pdfrx_init_png =
   'pdfrx_init_png',
 );
 
-final pdfrx_rgba_to_png = interopLib.lookupFunction<
+final pdfrx_bgra_to_png = interopLib.lookupFunction<
     IntPtr Function(Pointer<Uint8>, Int32, Int32, Pointer<UintPtr>),
     int Function(
       Pointer<Uint8>,
       int,
       int,
       Pointer<UintPtr>,
-    )>('pdfrx_rgba_to_png');
+    )>('pdfrx_bgra_to_png');
 
 typedef _NativeFileReadCallable
     = NativeCallable<Void Function(IntPtr, IntPtr, Pointer<Uint8>, IntPtr)>;
