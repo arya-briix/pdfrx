@@ -1,8 +1,12 @@
+#define FPNG_NO_STDIO 1
+
 #include <stdlib.h>
 #include <thread>
 #include <condition_variable>
 #include <mutex>
 #include <fpdfview.h>
+
+#include "fpng.h"
 
 #if defined(_WIN32)
 #define EXPORT __declspec(dllexport)
@@ -63,6 +67,41 @@ extern "C" EXPORT void INTEROP_API pdfrx_file_access_set_value(pdfrx_file_access
   std::unique_lock<std::mutex> lock(fileAccess->mutex);
   fileAccess->retValue = retValue;
   fileAccess->cond.notify_one();
+}
+
+extern "C" EXPORT void INTEROP_API pdfrx_init_png()
+{
+  fpng::fpng_init();
+}
+
+extern "C" EXPORT void *INTEROP_API pdfrx_rgba_to_png(const void *image, uint32_t w, uint32_t h, size_t *pSize)
+{
+  size_t size = w * h;
+  for (size_t i = 0; i < size; i++)
+  {
+    auto p = reinterpret_cast<uint32_t *>(const_cast<void *>(image));
+    auto c = p[i];
+    p[i] = (c & 0xFF00FF00) | ((c & 0xFF) << 16) | ((c >> 16) & 0xFF);
+  }
+
+  std::vector<uint8_t> buf;
+  if (!fpng::fpng_encode_image_to_memory(image, w, h, 4, buf))
+  {
+    *pSize = 0;
+    return nullptr;
+  }
+#if defined(_WIN32)
+  // NOTE: Dart FFI's malloc.free uses CoTaskMemFree on Windows
+  auto p = CoTaskMemAlloc(buf.size());
+#else
+  auto p = malloc(buf.size());
+#endif
+  if (p != nullptr)
+  {
+    memcpy(p, buf.data(), buf.size());
+  }
+  *pSize = buf.size();
+  return p;
 }
 
 #if defined(__APPLE__)

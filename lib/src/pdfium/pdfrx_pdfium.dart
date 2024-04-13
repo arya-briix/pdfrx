@@ -44,6 +44,8 @@ void _init() {
       config.ref.m_pIsolate = nullptr;
       config.ref.m_v8EmbedderSlot = 0;
       pdfium.FPDF_InitLibraryWithConfig(config);
+
+      pdfrx_init_png();
     },
   );
   _initialized = true;
@@ -537,26 +539,29 @@ class PdfPagePdfium extends PdfPage {
     backgroundColor ??= Colors.white;
     const rgbaSize = 4;
     Pointer<Uint8> buffer = nullptr;
+
     try {
       final bufferSize = width * height * rgbaSize;
       buffer = malloc.allocate<Uint8>(bufferSize);
-      final isSucceeded = await using(
+      final result = await using(
         (arena) async {
           final cancelFlag = arena.allocate<Bool>(sizeOf<Bool>());
+          final workBuffer = arena.allocate<UintPtr>(sizeOf<UintPtr>());
           ct?.attach(cancelFlag);
-          final isSucceeded = await document.synchronized(
+          return await document.synchronized(
             () async {
-              if (cancelFlag.value) return false;
+              if (cancelFlag.value) return (address: 0, size: 0);
               return await (await document._worker).compute(
                 (params) {
                   final cancelFlag =
                       Pointer<Bool>.fromAddress(params.cancelFlag);
-                  if (cancelFlag.value) return false;
+                  if (cancelFlag.value) return (address: 0, size: 0);
+                  final buffer = Pointer<Uint8>.fromAddress(params.buffer);
                   final bmp = pdfium.FPDFBitmap_CreateEx(
                     params.width,
                     params.height,
                     pdfium_bindings.FPDFBitmap_BGRA,
-                    Pointer.fromAddress(params.buffer),
+                    buffer.cast(),
                     params.width * rgbaSize,
                   );
                   if (bmp == nullptr) {
@@ -610,7 +615,20 @@ class PdfPagePdfium extends PdfPage {
                         0,
                       );
                     }
-                    return true;
+                    if (!params.outputPng) {
+                      return (address: buffer.address, size: params.bufferSize);
+                    }
+
+                    final pSize =
+                        Pointer<UintPtr>.fromAddress(params.workBuffer);
+                    final pngBuffer = pdfrx_rgba_to_png(
+                      buffer,
+                      params.width,
+                      params.height,
+                      pSize,
+                    );
+                    final size = pSize.value;
+                    return (address: pngBuffer, size: size);
                   } finally {
                     pdfium.FPDF_ClosePage(page);
                     pdfium.FPDFBitmap_Destroy(bmp);
@@ -619,7 +637,6 @@ class PdfPagePdfium extends PdfPage {
                 (
                   document: document.document.address,
                   pageNumber: pageNumber,
-                  buffer: buffer.address,
                   x: x,
                   y: y,
                   width: width!,
@@ -628,29 +645,36 @@ class PdfPagePdfium extends PdfPage {
                   fullHeight: fullHeight!.toInt(),
                   backgroundColor: backgroundColor!.value,
                   annotationRenderingMode: annotationRenderingMode,
+                  outputPng: outputType == PdfRenderOutputType.png,
                   formHandle: document.formHandle.address,
                   formInfo: document.formInfo.address,
                   cancelFlag: cancelFlag.address,
+                  buffer: buffer.address,
+                  bufferSize: bufferSize,
+                  workBuffer: workBuffer.address,
                 ),
               );
             },
           );
-          return isSucceeded;
         },
       );
 
-      if (!isSucceeded) {
+      if (result.address == 0) {
         return null;
       }
 
-      final resultBuffer = buffer;
-      buffer = nullptr;
+      if (result.address == buffer.address) {
+        buffer = nullptr;
+      }
+
       return PdfImagePdfium._(
         width: width,
         height: height,
-        format: PdfImageDataFormat.bgra,
-        buffer: resultBuffer,
-        size: bufferSize,
+        format: outputType == PdfRenderOutputType.png
+            ? PdfImageDataFormat.png
+            : PdfImageDataFormat.bgra,
+        buffer: Pointer.fromAddress(result.address),
+        size: result.size,
       );
     } catch (e) {
       return null;
@@ -858,23 +882,29 @@ class PdfImagePdfium extends PdfImage {
   @override
   final PdfImageDataFormat format;
   @override
-  Uint8List get data => _buffer.asTypedList(_size);
+  Uint8List get data => _data ?? _buffer!.asTypedList(_size!);
 
-  final Pointer<Uint8> _buffer;
-  final int _size;
+  final Uint8List? _data;
+  final Pointer<Uint8>? _buffer;
+  final int? _size;
 
   PdfImagePdfium._({
     required this.width,
     required this.height,
     required this.format,
-    required Pointer<Uint8> buffer,
-    required int size,
-  })  : _buffer = buffer,
-        _size = size;
+    Uint8List? data,
+    Pointer<Uint8>? buffer,
+    int? size,
+  })  : _data = data,
+        _buffer = buffer,
+        _size = size,
+        assert(data != null || (buffer != null && size != null));
 
   @override
   void dispose() {
-    malloc.free(_buffer);
+    if (_buffer != null) {
+      malloc.free(_buffer);
+    }
   }
 }
 

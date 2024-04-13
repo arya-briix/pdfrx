@@ -418,6 +418,43 @@ abstract class PdfImage {
     }
     return comp.future;
   }
+
+  Future<PdfImage> toPng() async {
+    if (format == PdfImageDataFormat.png) {
+      return this;
+    }
+    final image = await createImage();
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData == null) {
+      throw const PdfException('Failed to convert image to PNG');
+    }
+    return _PdfImagePng(Uint8List.view(byteData.buffer), width, height);
+  }
+}
+
+class _PdfImagePng extends PdfImage {
+  _PdfImagePng(this.data, this.width, this.height);
+  @override
+  final Uint8List data;
+
+  @override
+  final int width;
+
+  @override
+  final int height;
+
+  @override
+  PdfImageDataFormat get format => PdfImageDataFormat.png;
+
+  @override
+  void dispose() {}
+
+  @override
+  Future<ui.Image> createImage() async {
+    final comp = Completer<ui.Image>();
+    ui.decodeImageFromList(data, (image) => comp.complete(image));
+    return await comp.future;
+  }
 }
 
 /// Handles text extraction from PDF page.

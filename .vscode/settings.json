@@ -63,6 +63,7 @@
     "FPDFDOC",
     "FPDFPAGE",
     "fpdfview",
+    "fpng",
     "FREETEXT",
     "FXCT",
     "glyphpath",
@@ -248,6 +249,12 @@
     "xlocmon": "cpp",
     "xlocnum": "cpp",
     "xloctime": "cpp",
-    "xstring": "cpp"
+    "xstring": "cpp",
+    "any": "cpp",
+    "iostream": "cpp",
+    "map": "cpp",
+    "set": "cpp",
+    "variant": "cpp",
+    "xtree": "cpp"
   }
 }

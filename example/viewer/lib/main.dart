@@ -186,13 +186,13 @@ class _MainPageState extends State<MainPage> {
           Expanded(
             child: Stack(
               children: [
-                PdfViewer.asset(
-                  'assets/hello.pdf',
-                  // PdfViewer.file(
-                  //   r"D:\pdfrx\example\assets\hello.pdf",
-                  // PdfViewer.uri(
-                  //   Uri.parse(
-                  //       'https://espresso3389.github.io/pdfrx/assets/assets/PDF32000_2008.pdf'),
+                // PdfViewer.asset(
+                //   'assets/hello.pdf',
+                // PdfViewer.file(
+                //   r"D:\pdfrx\example\assets\hello.pdf",
+                PdfViewer.uri(
+                  Uri.parse(
+                      'https://espresso3389.github.io/pdfrx/assets/assets/PDF32000_2008.pdf'),
                   // PdfViewer.uri(
                   //   Uri.parse(kIsWeb
                   //       ? 'assets/assets/hello.pdf'

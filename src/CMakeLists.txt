@@ -7,6 +7,7 @@ project(pdfrx_library VERSION 0.0.1 LANGUAGES CXX)
 
 add_library(pdfrx SHARED
   "pdfium_interop.cpp"
+  "fpng.cpp"
 )
 
 set_target_properties(pdfrx PROPERTIES
