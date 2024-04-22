@@ -12,12 +12,15 @@
 #endif
 
 #if defined(_WIN32)
+#include <objbase.h>
 #define EXPORT __declspec(dllexport)
 #define PDFRX_PNG_API __stdcall
 #else
 #define EXPORT __attribute__((visibility("default"))) __attribute__((used))
 #define PDFRX_PNG_API
 #endif
+
+#include <string.h>
 
 #ifdef __ANDROID__
 typedef int (*AndroidBitmap_compress_func)(const AndroidBitmapInfo *info,

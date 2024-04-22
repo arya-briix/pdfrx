@@ -91,5 +91,9 @@ set(pdfrx_bundled_libraries
   PARENT_SCOPE
 )
 
+set(PDFIUM_COMPILE_OPTIONS_x86 -mpclmul -msse4.1)
+set(PDFIUM_COMPILE_OPTIONS_x64 -mpclmul -msse4.1)
+
 target_include_directories(pdfrx INTERFACE PRIVATE ${PDFIUM_LATEST_DIR}/include)
+target_compile_options(pdfrx PRIVATE ${PDFIUM_COMPILE_OPTIONS_${PDFIUM_LINUX_ABI}})
 target_link_libraries(pdfrx PRIVATE ${PDFIUM_LATEST_LIB_FILENAME})
